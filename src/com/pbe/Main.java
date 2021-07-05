@@ -63,9 +63,66 @@ package com.pbe;
 // To create a new thread, a program either extends Thread or implement Runnable.
 // Several methods to help manage threads are: getName, getPriority, isAlive, join, run, sleep, start
 
+// The main thread
+// The main thread is the one thread that all Java programs have. It's the thread that's executed when starting the program.
+// 'Child' threads are spawned from the main thread. And often it's the last thread to finish execution, to perform shutdown actions.
+// The main thread can be controlled through a Thread object, by obtaining a reference to it with currentThread(), a public static member of Thread.
+// The method returns a reference to the thread in which it is called. Once referenced, it can be controlled like any other thread.
+// Threads are part of groups. A thread group is a data structure that controls the state of a collection of threads as a whole.
+
+// Creating a thread
+// A thread can be created by instantiating an object of type Thread:
+// 1. By implementing the Runnable interface
+// 2. By extending the Thread class
+// ->>
+
+// 1. Implementing Runnable
+// A thread can be constructed on any object that implements Runnable.
+// To implement Runnable, a class only needs to implement run(), declared by: public void run()
+// Inside run(), code needs to be defined for the new thread.
+// Run() can call other classes and declare variables, as the main thread can.
+// The difference: run() establishes the entry point for another, concurrent thread of execution with the program.
+// This thread ends when run() returns.
+// After creating a class that implements Runnable, instantiate an object of type Thread from within the class.
+// Thread defines several constructors. One of them: Thread(Runnable threadOb, String threadName)
+// Here, threadOb is an instance of the class that implements Runnable and defines where execution of the thread starts.
+// It will not start running until start() is called. I.e.: start() initiates a call to run().
+
 public class Main {
 
     public static void main(String[] args) {
-	// write your code here
+
+        // Example of controlling the main thread
+        System.out.println("Controlling the main thread");
+        Thread t = Thread.currentThread();
+        System.out.println("Current thread: " + t); // will print: thread name, its priority, name of its group
+        t.setName("My main thread");
+        System.out.println("Current thread, after name change: " + t);
+        System.out.println("Alternative way to just get the thread name: " + t.getName());
+        try { // sleep() could throw an InterruptedException, if another thread wants to interrupt
+            for (int x = 5; x > 0; x--) {
+                System.out.println(x);
+                Thread.sleep(500); // note using Thread instead of t for reference &
+                // sleep can also be specified in nanoseconds, if the environment allows such timing periods
+            }
+        } catch (InterruptedException e) {
+            System.out.println("Main thread interrupted"); // just printing a message in this example
+        }
+        System.out.println();
+
+        // Example of creating and starting a new thread, with NewThread class that implements Runnable
+        System.out.println("Creating and starting a new thread");
+        NewThread nt = new NewThread(); // create a new thread
+        nt.t.start(); // start the thread - note that this will initiate a call to run()
+        try {
+            for (int x = 5; x > 0; x--) { // with the now created NewThread, both NewThread and main thread will run, sharing the CPU
+                System.out.println("Main thread: " + x);
+                Thread.sleep(500); // by setting the main thread sleep time higher than the child thread, this causes the child thread to terminate earlier
+            }
+        } catch (InterruptedException e) {
+            System.out.println("Main thread interrupted");
+        }
+        System.out.println("Main thread exiting \n");
+
     }
 }
