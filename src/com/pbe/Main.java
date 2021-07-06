@@ -74,7 +74,13 @@ package com.pbe;
 // A thread can be created by instantiating an object of type Thread:
 // 1. By implementing the Runnable interface
 // 2. By extending the Thread class
-// ->>
+
+// What approach to choose?
+// Using thread requires run() to be overridden. This is the same method required when implementing Runnable.
+// As it's common use to only extend classes when they are being enhanced or adapted, implementing Runnable is favored.
+// By implementing Runnable, the thread class does not need to inherit Thread, making it free to inherit a different class.
+
+// Detailing of both solutions ->>
 
 // 1. Implementing Runnable
 // A thread can be constructed on any object that implements Runnable.
@@ -87,6 +93,32 @@ package com.pbe;
 // Thread defines several constructors. One of them: Thread(Runnable threadOb, String threadName)
 // Here, threadOb is an instance of the class that implements Runnable and defines where execution of the thread starts.
 // It will not start running until start() is called. I.e.: start() initiates a call to run().
+
+// 2. Extending thread
+// Another way to create a thread is to create an instance of a class that extends Thread.
+// The extending class must override run(), which is the entry point for the thread.
+// And start() is to be called to begin execution of the new thread.
+
+// Ending a thread
+// Two ways to determine if a thread has finished:
+// 1. Call isAlive() on the thread: final boolean isAlive() - will return true if the thread is alive
+// 2. More commonly used, call join(): final void join() throws InterruptedException
+// Join() waits until the thread on which it is called terminates.
+// It also allows to specify a maximum amount of time to wait for the specified thread to terminate.
+
+// Thread priorities
+// The thread scheduler uses priorities to decide when threads should be allowed to run.
+// The amount of CPU time given to a thread often depends on factors besides priority, such how the OS implements multitasking.
+// The safest way to obtain predictable, cross-platform behavior with Java is to use threads that voluntary yield control.
+// A higher priority thread can preempt (=take action to prevent an anticipated event happening) a lower priority thread.
+// For safety, threads that share the same priority should yield control once in a while.
+// This to ensure all threads have a chance to run under a non-preemptive OS (= non interrupting a process running CPU in the middle of execution).
+// Threads of CPU-intensive tasks dominate the CPU and for this reason control should be yielded occasionally so that other threads can run.
+// Use setPriority() to set a thread's priority: final void setPriority(int level) - with level being the priority setting.
+// The value of level must be in the range MIN_PRIORITY (=1) and MAX_PRIORITY (=10)
+// NORM_PRIORITY is used to return a thread to default priority (=5).
+// These variables are defined as static final variables within Thread.
+// Obtain the current priority setting by calling getPriority(): final int getPriority()
 
 public class Main {
 
@@ -111,7 +143,7 @@ public class Main {
         System.out.println();
 
         // Example of creating and starting a new thread, with NewThread class that implements Runnable
-        System.out.println("Creating and starting a new thread");
+        System.out.println("Creating and starting a new thread, by implementing Runnable");
         NewThread nt = new NewThread(); // create a new thread
         nt.t.start(); // start the thread - note that this will initiate a call to run()
         try {
@@ -124,5 +156,67 @@ public class Main {
         }
         System.out.println("Main thread exiting \n");
 
+        // Example of creating and starting a new thread, by extending Thread
+        System.out.println("Creating and starting a new thread, by extending Thread");
+        NewThread2 nt2 = new NewThread2(); // create thread
+        nt2.start(); // start thread
+        try {
+            for(int x = 5; x > 0; x--) {
+                System.out.println("Main thread: " + x);
+                Thread.sleep(500);
+            }
+        } catch (InterruptedException e) {
+            System.out.println("Main thread interrupted");
+        }
+        System.out.println("Main thread exiting");
+
+        // Creating three child threads
+        System.out.println("Creating three child threads");
+        MultipleThreads mp1 = new MultipleThreads("Child thread one");
+        MultipleThreads mp2 = new MultipleThreads("Child thread two");
+        MultipleThreads mp3 = new MultipleThreads("Child thread three");
+
+        // Starting the threads
+        mp1.t.start();
+        mp2.t.start();
+        mp3.t.start();
+
+        try {
+            Thread.sleep(10000); // making main thread sleep 10sec to ensure it finishes last
+        } catch (InterruptedException e) {
+            System.out.println("Main thread interrupted");
+        }
+        System.out.println("Main thread exiting \n");
+
+        // Creating three child threads - improved version
+        // Using join() (instead of Thread.sleep()) to ensure that the main thread is the last to stop
+
+        // Starting the threads
+        mp1 = new MultipleThreads("Child thread one");
+        mp2 = new MultipleThreads("Child thread two");
+        mp3 = new MultipleThreads("Child thread three");
+
+        mp1.t.start();
+        mp2.t.start();
+        mp3.t.start();
+
+        System.out.println("Thread 1 is alive: " + mp1.t.isAlive()); // using isAlive() to check the thread status
+        System.out.println("Thread 2 is alive: " + mp2.t.isAlive());
+        System.out.println("Thread 3 is alive: " + mp3.t.isAlive());
+
+        try {
+            System.out.println("Waiting for threads to finish");
+            mp1.t.join(); // using join() instead of sleep()
+            mp2.t.join();
+            mp3.t.join();
+        } catch (InterruptedException e) {
+            System.out.println("Main thread interrupted");
+        }
+        System.out.println("Thread 1 is alive: " + mp1.t.isAlive()); // after the calls to join() return, the threads have stopped executing
+        System.out.println("Thread 2 is alive: " + mp2.t.isAlive());
+        System.out.println("Thread 3 is alive: " + mp3.t.isAlive());
+
+        System.out.println("Main thread exiting \n");
     }
+
 }

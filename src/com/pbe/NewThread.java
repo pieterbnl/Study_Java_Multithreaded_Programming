@@ -6,8 +6,9 @@ public class NewThread implements Runnable{
 
     // Constructor, creating -in the context of this example- a (second) thread
     NewThread() {
+        System.out.println("Constructor is called");
         t = new Thread(this, "Second thread"); // passing 'this' indicates that the new thread needs to call the run()) method on this object
-        System.out.println("Child thread: " + t);
+        System.out.println("Child thread: " + t); // printing the thread specifics: thread name, priority, thread group
     }
 
     // Second thread entry point
