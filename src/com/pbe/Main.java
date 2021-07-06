@@ -164,6 +164,15 @@ package com.pbe;
 // Meaning a waiting thread resumes without notify() or notifyAll() being called (i.e.: the thread resumes for no apparent reason).
 // It is therefore recommended that calls to wait() take place within a loop that checks the condition on which the thread is waiting.
 
+// Deadlock
+// A deadlock occurs when two threads have a circular dependency on a pair of synchronized objects.
+// For example when thread 1 enters the monitor on object X and thread2 on object Y.
+// If thread in X tries to call a synchronized method on Y, it will be blocked as it should.
+// When the tread in Y tries to call a synchronized method on X, the threads will end up waiting forever to release their locks.
+//
+// Deadlock occurs when two or more threads acquire -at just the same time- locks which prevent either of them from progressing. This makes it difficult to debug.
+// If a multithreaded program locks up occasionally, deadlock is one of the first things to check for.
+
 public class Main {
 
     public static void main(String[] args) {
@@ -362,5 +371,13 @@ public class Main {
         p2.t.start();
         c2.t.start();
 
+         **********************
+         Deadlock example
+         **********************
+         This example will create a deadlock, with RacingThread trying to call A.last() and MainThread trying to call B.last()
+         RacingThread owns the monitor on b, while it is waiting for the monitor on a
+         MainThread at the same time owns the monitor on a and is waiting to get b
+        Deadlock dl = new Deadlock(); // this will trigger the Deadlock constructor, which will initiate the creation of 2 threads
+        dl.deadLockStart();
     }
 }
