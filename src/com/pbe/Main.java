@@ -173,6 +173,15 @@ package com.pbe;
 // Deadlock occurs when two or more threads acquire -at just the same time- locks which prevent either of them from progressing. This makes it difficult to debug.
 // If a multithreaded program locks up occasionally, deadlock is one of the first things to check for.
 
+// Suspending, Resuming and Stopping Threads
+// Suspending execution of a thread can be useful sometimes. In early version of Java programs could use suspend(), resume(), stop().
+// Which are methods defined by Thread to control the execution of a thread. These method should/can no longer be used.
+// Instead, a thread must be designed so that the run() method periodically checks to determine whether a thread should suspend/resume/stop.
+// This can be accomplished by establishing a flag variable that indicates the execution state of the thread.
+// The flag can be set to 'running', 'suspend' or 'stop' to have the thread respectively continue, suspend or stop.
+// This approach must be used for all new code.
+
+
 public class Main {
 
     public static void main(String[] args) {
@@ -379,5 +388,43 @@ public class Main {
          MainThread at the same time owns the monitor on a and is waiting to get b
         Deadlock dl = new Deadlock(); // this will trigger the Deadlock constructor, which will initiate the creation of 2 threads
         dl.deadLockStart();
+
+    // **********************
+    // Suspending and resuming a thread with use of a flag variable
+    // **********************
+    // This example illustrates how the wait() and notify() methods (inherited from Object) can be used to control the execution of a thread.
+
+        // Create the threads
+        NewThread3 object1 = new NewThread3("One");
+        NewThread3 object2 = new NewThread3("Two");
+
+        // Start the threads
+        object1.t.start();
+        object2.t.start();
+
+        try {
+            Thread.sleep(1000);
+            object1.mysuspend();
+            System.out.println("Suspending thread one");
+            Thread.sleep(1000);
+            object1.myresume();
+            System.out.println("Resuming thread one");
+            object2.mysuspend();
+            System.out.println("Suspending thread two");
+            Thread.sleep(1000);
+            object2.myresume();
+        } catch (InterruptedException e) {
+            System.out.println("Main thread interrupted");
+        }
+
+        // wait for threads to finish
+        try {
+            System.out.println("Waiting for threads to finish");
+            object1.t.join();
+            object2.t.join();
+        } catch (InterruptedException e) {
+            System.out.println("Main thread interrupted");
+        }
+        System.out.println("Main thread exiting");
     }
 }
