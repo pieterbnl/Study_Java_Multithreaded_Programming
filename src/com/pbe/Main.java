@@ -120,11 +120,39 @@ package com.pbe;
 // These variables are defined as static final variables within Thread.
 // Obtain the current priority setting by calling getPriority(): final int getPriority()
 
+// Synchronization
+// Synchronization is the process to ensure that a resource is used only by a single thread at a time.
+// Synchronization uses a 'monitor' to achieve this: an object that is used as a mutually exclusive lock.
+// Each thread can 'own' a monitor at a given time and is said to have 'entered' the monitor when acquiring a lock.
+// Other threads attempting to enter the locked monitor will be suspended until the initial thread 'exits' the monitor.
+// The other threads are 'waiting'.
+// A thread that owns a monitor can reenter it if it wants.
+
+// Code can be synchronized in two ways, both involving the synchronized keyword:
+// 1. Using synchronized methods
+// 2. The synchronized statement
+// ->>
+
+// 1. Using synchronized methods
+// All objects have their own implicit monitor associated with them.
+// To enter an objects monitor, make a call to a method that has been modified with the synchronized keyword.
+// Threads that call a synchronized method on the same instance while there's already a thread inside, must wait.
+// The monitor is exited by returning from the synchronized method and can then relinquish control of the object to the next waiting thread.
+
+// 2. The synchronized statement
+// Creating synchronized methods within classes to achieve synchronization will not work in all cases.
+// For example when using a third party class that does not use synchronized methods and does not offer access to its source code.
+// The solution is to put calls to the methods defined by this class inside a synchronized block: synchronized(objRef) { // statements to be synchronized }
+// The block ensures that a call to a synchronized method that is a member of objRef class occurs only after the current thread has entered objRef's monitor.
+
+
 public class Main {
 
     public static void main(String[] args) {
 
+        // **********************
         // Example of controlling the main thread
+        // **********************
         System.out.println("Controlling the main thread");
         Thread t = Thread.currentThread();
         System.out.println("Current thread: " + t); // will print: thread name, its priority, name of its group
@@ -142,7 +170,9 @@ public class Main {
         }
         System.out.println();
 
+        // **********************
         // Example of creating and starting a new thread, with NewThread class that implements Runnable
+        // **********************
         System.out.println("Creating and starting a new thread, by implementing Runnable");
         NewThread nt = new NewThread(); // create a new thread
         nt.t.start(); // start the thread - note that this will initiate a call to run()
@@ -156,7 +186,9 @@ public class Main {
         }
         System.out.println("Main thread exiting \n");
 
+        // **********************
         // Example of creating and starting a new thread, by extending Thread
+        // **********************
         System.out.println("Creating and starting a new thread, by extending Thread");
         NewThread2 nt2 = new NewThread2(); // create thread
         nt2.start(); // start thread
@@ -188,14 +220,18 @@ public class Main {
         }
         System.out.println("Main thread exiting \n");
 
+        // **********************
         // Creating three child threads - improved version
+        // **********************
         // Using join() (instead of Thread.sleep()) to ensure that the main thread is the last to stop
+        System.out.println("Creating three child threads, improved version");
 
-        // Starting the threads
+        // Creating three child threads
         mp1 = new MultipleThreads("Child thread one");
         mp2 = new MultipleThreads("Child thread two");
         mp3 = new MultipleThreads("Child thread three");
 
+        // Starting the threads
         mp1.t.start();
         mp2.t.start();
         mp3.t.start();
@@ -215,8 +251,70 @@ public class Main {
         System.out.println("Thread 1 is alive: " + mp1.t.isAlive()); // after the calls to join() return, the threads have stopped executing
         System.out.println("Thread 2 is alive: " + mp2.t.isAlive());
         System.out.println("Thread 3 is alive: " + mp3.t.isAlive());
-
         System.out.println("Main thread exiting \n");
-    }
 
+        // **********************
+        // Demonstration of synchronization, under 'race condition'
+        // **********************
+        // Calling sleep() in Callme, has call() allowing execution to switch to another thread, resulting in mixed-up output of three messages.
+        // In this example nothing exists to stop all three threads from the same method on the same object at the same time.
+        // This is a race condition because the three threads race each other to complete the method.
+        // Sleep() as used in callme() makes the effects more repeatable and obvious.
+        // Restricting access to only one thread at a time -by serializing access to call()- fixes the mix-up of messages.
+        // To do so: precede call()'s definition with the synchronized keyword: synchronized void call(String msg)
+        System.out.println("Demonstration of synchronization, under race condition");
+        Callme target = new Callme();
+
+        // Create three child threads, all pointing to target
+
+        Caller ob1 = new Caller(target, "Hello");
+        Caller ob2 = new Caller(target, "Synchronized");
+        Caller ob3 = new Caller(target, "World");
+
+        // Start the threads
+        ob1.t.start();
+        ob2.t.start();
+        ob3.t.start();
+
+        // Wait for threads to end
+        try {
+            ob1.t.join();
+            ob2.t.join();
+            ob3.t.join();
+        } catch (InterruptedException e) {
+            System.out.println("Interrupted");
+        }
+        System.out.println();
+
+        // **********************
+        // Demonstration of synchronization, using a synchronized block (in CallerSynchronized class)
+        // **********************
+        // CallerSynchronized class is a copy of Caller class, now using a synchronized statement inside CallerSynchronized run() method
+        // This makes each thread wait for the prior one to finish before proceeding, resulting in the same results as previous example.
+        // Without having call() modified by synchronized.
+        System.out.println("Demonstration of synchronization, using a synchronized block");
+        Callme target_s = new Callme();
+
+        // Create three child threads, all pointing to target
+        CallerSynchronized obs1 = new CallerSynchronized(target_s, "Hello");
+        CallerSynchronized obs2 = new CallerSynchronized(target_s, "Synchronized");
+        CallerSynchronized obs3 = new CallerSynchronized(target_s, "World");
+
+        // Start the threads
+        obs1.t.start();
+        obs2.t.start();
+        obs3.t.start();
+
+        // Wait for threads to end
+        try {
+            obs1.t.join();
+            obs2.t.join();
+            obs3.t.join();
+        } catch (InterruptedException e) {
+            System.out.println("Interrupted");
+        }
+        System.out.println();
+
+
+    }
 }
