@@ -145,6 +145,24 @@ package com.pbe;
 // The solution is to put calls to the methods defined by this class inside a synchronized block: synchronized(objRef) { // statements to be synchronized }
 // The block ensures that a call to a synchronized method that is a member of objRef class occurs only after the current thread has entered objRef's monitor.
 
+// Interthread communication
+// Use of implicit monitors in Java objects is powerful, but a more subtle level of control can be achieved through interprocess communication.
+// Multithreading replaces event loop programming by dividing tasks into discrete, logical units. They also do away with polling.
+// Polling is usually implemented by a loop that is used to check a condition repeatedly until a certain condition is reached, wasting CPU time.
+//
+// To avoid polling, Java's interprocess communication mechanism can be used via the methods:
+// 1. wait() - instructs the calling thread to give up the monitor and go sleep until another thread enters the monitor and calls notify() or notifyAll()
+// 2. notify() - wakes up the thread that called wait() on the same object
+// 3. notifyAll() - wakes up all the threads that called wait() on the same object, of which one will be granted access
+//
+// These methods are implemented as final methods in Object, so all classes have them, and declared as: final void wait(), final void notify(), ..
+// They can be called only from within a synchronized context.
+//
+// Additional notes:
+// - Additional forms of wait() al;low to specify a period of time to wait.
+// - Wait() normally waits until notify() or notifyAll() is called.. BUT.. in rare cases the waiting thread can be awakened due to a 'spurious wakeup'.
+// Meaning a waiting thread resumes without notify() or notifyAll() being called (i.e.: the thread resumes for no apparent reason).
+// It is therefore recommended that calls to wait() take place within a loop that checks the condition on which the thread is waiting.
 
 public class Main {
 
@@ -315,6 +333,34 @@ public class Main {
         }
         System.out.println();
 
+        // **********************
+        // Example of an incorrect implementation of a producer and consumer
+        // **********************
+        // The put() and get() methods on Q are synchronized.
+        // However, nothing stops the producer from overrunning the consumer, or the consumer from consuming the same queue value twice.
+        // As a result, the output is erroneous.
+        // The producer will put an x number, the consumer starts and will get the number x times.
+        // Both threads will continue to fight for CPU, without letting the other time.
+        Queue q = new Queue();
+        Producer p = new Producer(q);
+        Consumer c = new Consumer(q);
+
+        // Start the threads - which will continue running endlessly. Stop Main to exit the program.
+        p.t.start();
+        c.t.start();
+
+
+        // **********************
+        // Example of a correct implementation of a producer and consumer
+        // **********************
+        // Now with use of wait() and notify() to signal in both directions
+        Queue2 q2 = new Queue2();
+        Producer2 p2 = new Producer2(q2);
+        Consumer2 c2 = new Consumer2(q2);
+
+        // Start the threads - which will continue running endlessly. Stop Main to exit the program.
+        p2.t.start();
+        c2.t.start();
 
     }
 }
