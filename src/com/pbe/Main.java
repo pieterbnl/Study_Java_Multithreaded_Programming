@@ -9,6 +9,21 @@ package com.pbe;
 // *********************
 // MULTITHREADED PROGRAMMING
 // *********************
+// Introduction to concurrency/threads
+// - Concurrency: refers to an application doing more than one thing at a time. It allows one task to run/continue, while another one runs as well.
+// - Every Java application runs as a single process, and each process can have multiple threads.
+// - Every process has a heap and every thread has a tread stack.
+// - A process (or 'application') - Is a unit of execution with it's own memory space (the 'heap').
+//   Each instance of a JVM runs as a process (not true for all JVM implementations, but most of them).
+// - Each application has its own memory space of heap, which is not shared with other applications.
+// - A thread is a unit of execution, within a process. Each process can have multiple threads.
+//   Each program has at least one thread: the main thread.
+// - Creating a thread doesn't require as many resources as creating a process, which shares memory and files.
+// - In addition to the process's heap, each thread has a thread stack: memory that only that thread can access.
+// - Multiple threads are useful when a complicated/long running task needs to be performed, potentially freezing the main tread.
+// - Another reason is because an API requires a thread (or code to be run) to be provided.
+// - JVM and the operating system control when threads are scheduled to run, resulting in varying output between runs.
+
 // A multithreaded program consists of two or more parts that run concurrently.
 // Each part is called a thread. Each thread defines its own path of execution.
 // A thread is an executable, lightweight unit that accesses shared resources as well as its own call stack.
@@ -98,6 +113,16 @@ package com.pbe;
 // 2. More commonly used, call join(): final void join() throws InterruptedException
 // Join() waits until the thread on which it is called terminates.
 // It also allows to specify a maximum amount of time to wait for the specified thread to terminate.
+
+// Interrupting a thread
+// Two ways for a thread to be interrupted:
+// 1. Catch the interrupted exception
+// 2. If the run() method doesnt call any methods that throw an exception,
+// it should call the interrupted method periodically to check whether it has been interrupted
+// That method will return true if the thread has been interrupted.
+//
+// One thread interrupts another by calling the interrupt method on th other instance it wants to interrupt
+// For that it uses a reference to that thread instance.
 
 // Thread priorities
 // The Thread class provides a setPriority() method to set the priority for a thread.
