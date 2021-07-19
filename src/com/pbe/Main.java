@@ -10,16 +10,19 @@ package com.pbe;
 // MULTITHREADED PROGRAMMING
 // *********************
 // Introduction to concurrency/threads
-// - Concurrency: refers to an application doing more than one thing at a time. It allows one task to run/continue, while another one runs as well.
-// - Every Java application runs as a single process, and each process can have multiple threads.
-// - Every process has a heap and every thread has a tread stack.
-// - A process (or 'application') - Is a unit of execution with it's own memory space (the 'heap').
+// - Concurrency: refers to an application doing more than one thing at a time.
+//   It allows one task to run/continue, while another one runs as well.
+// - Every Java application runs as a single process, and each process can have multiple threads:
+//   - A process (or 'application') is a unit of execution, with it 's own memory space (the 'heap').
+//   - A thread is a unit of execution, within a process.
+// - Every application has at least one thread: the main thread.
 //   Each instance of a JVM runs as a process (not true for all JVM implementations, but most of them).
-// - Each application has its own memory space of heap, which is not shared with other applications.
-// - A thread is a unit of execution, within a process. Each process can have multiple threads.
-//   Each program has at least one thread: the main thread.
+// - Each application/process has its own memory space of heap, which all threads share (but that is not shared with other applications).
+// - Each thread has a tread stack, memory that only that thread can access.
+// - Local variables are stored in the thread stack. I.e.: each thread has its own copy of a local variable.
+// - Memory required to store an objects instance value is allocated on the heap.
 // - Creating a thread doesn't require as many resources as creating a process, which shares memory and files.
-// - In addition to the process's heap, each thread has a thread stack: memory that only that thread can access.
+// - I.e. multiple threads working on the same object, share the same object, sharing changes in objects instance variables.
 // - Multiple threads are useful when a complicated/long running task needs to be performed, potentially freezing the main tread.
 // - Another reason is because an API requires a thread (or code to be run) to be provided.
 // - JVM and the operating system control when threads are scheduled to run, resulting in varying output between runs.
@@ -123,6 +126,9 @@ package com.pbe;
 //
 // One thread interrupts another by calling the interrupt method on th other instance it wants to interrupt
 // For that it uses a reference to that thread instance.
+//
+// To interrupt: just call interrupt() on a thread: somethread.interrupt();
+
 
 // Thread priorities
 // The Thread class provides a setPriority() method to set the priority for a thread.
@@ -135,6 +141,7 @@ package com.pbe;
 //
 // The thread scheduler uses priorities to decide when threads should be allowed to run.
 // How prioritization of multiple threads with equal priority that compete for CPU cycles is resolved, depends on the operating system.
+// Some don't even support it and will ignore it. So priority should mostly be considered a suggestion to the JVM & OS, rather than a command.
 // Also the amount of CPU time given to a thread often depends on factors besides priority, such how the OS implements multitasking.
 //
 // The safest way to obtain predictable, cross-platform behavior with Java is to use threads that voluntary yield control.
@@ -149,10 +156,18 @@ package com.pbe;
 // These variables are defined as static final variables within Thread.
 // Obtain the current priority setting by calling getPriority(): final int getPriority()
 
+// Thread interference / race condition
+// If multiple threads are working on shared resources at the same time this can result in 'thread interference'/'race condition'.
+// Each thread then races each other to complete a method.
+// This doesn't have to be a problem when they are just reading, but if they are also updating the resources, it will be a problem.
+// Restricting access to only one thread at a time -by serializing access to call() fixes this.
+// To do so: precede call()'s definition with the synchronized keyword: synchronized void call(String msg)
+
 // Synchronization
 // Multithreading introduces asynchronous behavior to programs. There are ways to enforce synchronicity when needed.
 // This is needed for example to prevent conflicts when two threads are required to communicate and share a complicated data structure.
 // For example a linked list, where one thread shouldn't be writing, while the other is still reading.
+//
 // Synchronization is the process to ensure that a resource is used only by a single thread at a time.
 // Synchronization uses a 'monitor' to achieve this: an object that is used as a mutually exclusive lock.
 // Each object has its own implicit monitor that's automatically entered when one of the objects synchronized methods is called.
