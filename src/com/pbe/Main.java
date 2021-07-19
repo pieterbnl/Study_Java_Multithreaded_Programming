@@ -129,7 +129,6 @@ package com.pbe;
 //
 // To interrupt: just call interrupt() on a thread: somethread.interrupt();
 
-
 // Thread priorities
 // The Thread class provides a setPriority() method to set the priority for a thread.
 // Threads are assigned a priority (integer value) that determines how each thread should be treated compared to others.
@@ -192,6 +191,13 @@ package com.pbe;
 // For example when using a third party class that does not use synchronized methods and does not offer access to its source code.
 // The solution is to put calls to the methods defined by this class inside a synchronized block: synchronized(objRef) { // statements to be synchronized }
 // The block ensures that a call to a synchronized method that is a member of objRef class occurs only after the current thread has entered objRef's monitor.
+//
+// Notes:
+// - Don't use local variables to synchronize, as they are not shared between the threads.
+// - When a class is not synchronized, this may be referred to as it's not 'thread safe'.
+// - Some Collections, like ArrayList, are not thread safe (the implementation is not synchronized).
+//   Meaning when using an ArrayList, which can be handled by multiple threads,
+//   it's your own responsible for synchronizing the code that uses the ArrayList.
 
 // Interthread communication
 // Use of implicit monitors in Java objects is powerful, but a more subtle level of control can be achieved through interprocess communication.
